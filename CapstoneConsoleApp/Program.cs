@@ -30,13 +30,13 @@ namespace CapstoneConsoleApp
             driver.FindElement(By.Id("login-signin")).Click();
             driver.FindElement(By.Id("login-signin")).Click();
 
-            driver.Url = "https://finance.yahoo.com/portfolio/p_0/view/v1";
-
-            // switch to portfolio page, leaving 
+            // using JSExecutor, switch to popup + close, then switch back to portfolio page
             IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
             IList<string> tabs = new List<string>(driver.WindowHandles);
             driver.SwitchTo().Window(driver.WindowHandles[1]).Close();
             driver.SwitchTo().Window(tabs[0]);
+
+            driver.Url = "https://finance.yahoo.com/portfolio/p_0/view/v1";
 
             driver.Manage().Window.Maximize();
 
