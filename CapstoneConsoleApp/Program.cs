@@ -3,6 +3,7 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support;
 using OpenQA.Selenium.Support.UI;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace CapstoneConsoleApp
@@ -31,18 +32,66 @@ namespace CapstoneConsoleApp
 
             driver.Url = "https://finance.yahoo.com/portfolio/p_0/view/v1";
 
-            // driver.SwitchTo().Window(driver.WindowHandles.Last());
+            // switch to portfolio page, leaving 
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            IList<string> tabs = new List<string>(driver.WindowHandles);
+            driver.SwitchTo().Window(driver.WindowHandles[1]).Close();
+            driver.SwitchTo().Window(tabs[0]);
 
-            var tabs = driver.WindowHandles; 
+            driver.Manage().Window.Maximize();
 
-            foreach (var tab in tabs)
+            /*
+
+            // scrape data!!
+            IWebElement PortfolioTable = driver.FindElement(By.ClassName("W(100%)"));
+
+            // Find all rows in the table and assign to a list
+            IList<IWebElement> rows = new List<IWebElement>(PortfolioTable.FindElements(By.TagName("tr")));
+            String strRowData = "";
+
+            // loop through rows in table to only get columns
+            for (int j = 1; j < rows.Count; j++)
             {
-                if (tabs[0] != tab)
+                // During the loop, get the columns from a particular row and set = 1stTdElem, a list
+                List<IWebElement> lstTdElem = new List<IWebElement>(rows[j].FindElements(By.TagName("td")));
+
+                if (lstTdElem.Count > 0)
                 {
-                    driver.SwitchTo().Window(tab);
-                    driver.Close();
+                    for (int i = 0; i < 9; i++)
+                    {
+                        strRowData = strRowData + lstTdElem[i].Text + ",";
+                    }
+                }
+                else
+                {
+                    // To print the data into the console and add comma between text
+                    Console.WriteLine(rows[0].Text.Replace(" ", ","));
                 }
             }
+
+            // Print the data to the console
+            System.Console.WriteLine(strRowData);
+            */
         }
     }
 }
+
+// the * symbol is the wildcard or select all
+
+// table headers example: symbol, price, change, change %. currency, market time, volume
+//*[@id="pf-detail-table"]/div[1]/table/thead/tr/th[*]
+
+// all of column 1
+//*[@id="pf-detail-table"]/div[1]/table/tbody/tr[*]/td[*]/a
+
+// all of row 1
+//*[@id="pf-detail-table"]/div[1]/table/tbody/tr[1]/td[*]/span
+
+
+
+
+
+
+
+
+
