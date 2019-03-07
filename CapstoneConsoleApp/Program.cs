@@ -24,21 +24,12 @@ namespace CapstoneConsoleApp
 
             IWebElement login = driver.FindElement(By.Id("login-username"));
             login.SendKeys("gregsmith446@intracitygeeks.org");
-            login.Submit();
+            login.SendKeys(Keys.Return);
 
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
             IWebElement password = driver.FindElement(By.Id("login-passwd"));
             password.SendKeys("SILICONrhode1!");
             driver.FindElement(By.Id("login-signin")).SendKeys(Keys.Return);
-            // driver.FindElement(By.Id("login-signin")).Click();
-
-            // using JSExecutor, switch to popup + close, then switch back to portfolio page
-            /*
-            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
-            IList<string> tabs = new List<string>(driver.WindowHandles);
-            driver.SwitchTo().Window(driver.WindowHandles[1]).Close();
-            driver.SwitchTo().Window(tabs[0]);
-            */
 
             driver.Url = "https://finance.yahoo.com/portfolio/p_0/view/v1";
 
