@@ -4,86 +4,113 @@ using OpenQA.Selenium.Support;
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace CapstoneConsoleApp
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args)
         {
+            // create instance of scraper class
+            var runScraper = new Scraper();
+
+            // using class, access the actual scraping code, which returns a list
+            runScraper.Scrape();
+
+            // print the contents of that list to the console
+            Console.WriteLine("The Portfolio of stocks is as follows: ");
+        }
+    }
+        
+    public class Stock
+    {
+        public string Symbol { get; set; }
+        public string Price { get; set; }
+        public string Change { get; set; }
+        public string PChange { get; set; }
+        public string Volume { get; set; }
+        public string MarketCap { get; set; }
+        public System.DateTime ScrapeTime { get; set; }
+    }
+
+    public class Scraper
+    {
+        public List<Stock> Scrape()
+        {
             ChromeOptions options = new ChromeOptions();
+            options.AddArguments("test-Type", "--ignore-certificate-errors", "--disable-gpu", "window-size=1920,1080");
 
-            options.AddArguments("test-Type", "--ignore-certificate-errors");
+            IWebDriver driver = new ChromeDriver(@"\Users\gregs\Desktop\CD\CapstoneConsoleApp\CapstoneConsoleApp\bin", options);
 
-            var driver = new ChromeDriver(@"\Users\gregs\Desktop\CD\CapstoneConsoleApp\CapstoneConsoleApp\bin", options);
-
-            driver.Url = "https://login.yahoo.com/config/login?.src=finance&amp;.intl=us&amp;.done=https%3A%2F%2Ffinance.yahoo.com%2Fportfolios";
-
+            driver.Navigate().GoToUrl("https://login.yahoo.com/config/login?.src=finance&amp;.intl=us&amp;.done=https%3A%2F%2Ffinance.yahoo.com%2Fportfolios");
             driver.Manage().Window.Maximize();
 
-            IWebElement login = driver.FindElement(By.Id("login-username"));
-            login.SendKeys("gregsmith446@intracitygeeks.org");
-            login.SendKeys(Keys.Return);
+            IWebElement username = driver.FindElement(By.Id("login-username"));
+            username.SendKeys("gregsmith446@intracitygeeks.org");
+            username.SendKeys(Keys.Return);
 
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+
             IWebElement password = driver.FindElement(By.Id("login-passwd"));
             password.SendKeys("SILICONrhode1!");
-            driver.FindElement(By.Id("login-signin")).SendKeys(Keys.Return);
+            IWebElement loginButton = driver.FindElement(By.Id("login-signin"));
+            loginButton.SendKeys(Keys.Return);
 
-            driver.Url = "https://finance.yahoo.com/portfolio/p_0/view/v1";
+            driver.Navigate().GoToUrl("https://finance.yahoo.com/portfolio/p_0/view/v1");
 
-            // you are now on the portfolio page 
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
 
-            // instantiate an IWebElement object named Portfolio Table
-            IWebElement PortfolioTable = driver.FindElement(By.Id("pf-detail-table"));
+            IWebElement list = driver.FindElement(By.TagName("tbody"));
+            ReadOnlyCollection<IWebElement> items = list.FindElements(By.TagName("tr"));
+            int count = items.Count;
 
-            // instantiate a LIST called rows and assign the table rows to a list
-            IList<IWebElement> rows = new List<IWebElement>(PortfolioTable.FindElements(By.TagName("tr")));
+            Console.WriteLine("There are " + count + " stocks in the list.");
 
-            // set row data = nothing - will be used to hold all the row data
-            String strRowData = "";
+            // create list to store stock data type
+            List<Stock> stockList = new List<Stock>();
 
-            // loop through rows in table to only get columns
-            for (int j = 1; j < rows.Count; j++)
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+
+            var testpath = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr[1]/td[1]/a")).GetAttribute("innerText");
+            Console.WriteLine(testpath);
+
+            //Loop iterate through portfolio of stocks, gathering data
+            // current issue is the 
+            for (int i = 1; i <= count; i++)
             {
-                // During the loop, instantiate a LIST called 1stTdElement that will hold table data
-                List<IWebElement> lstTdElem = new List<IWebElement>(rows[j].FindElements(By.TagName("td")));
+                var symbol = driver.FindElement(By.XPath("//*[@id=\"pf - detail - table\"]/div[1]/table/tbody/tr[" + i + "]/td[1]/a")).GetAttribute("innerText");
+                var price = driver.FindElement(By.XPath("//*[@id=\"pf - detail - table\"]/div[1]/table/tbody/tr[" + i + "]/td[2]/a")).GetAttribute("innerText");
+                var change = driver.FindElement(By.XPath("//*[@id=\"pf - detail - table\"]/div[1]/table/tbody/tr[" + i + "]/td[3]/a")).GetAttribute("innerText");
+                var pchange = driver.FindElement(By.XPath("//*[@id=\"pf - detail - table\"]/div[1]/table/tbody/tr[" + i + "]/td[4]/a")).GetAttribute("innerText");
+                var volume = driver.FindElement(By.XPath("//*[@id=\"pf - detail - table\"]/div[1]/table/tbody/tr[" + i + "]/td[7]/a")).GetAttribute("innerText");
+                var marketcap = driver.FindElement(By.XPath("//*[@id=\"pf - detail - table\"]/div[1]/table/tbody/tr[" + i + "]/td[13]/a")).GetAttribute("innerText");
 
-                // loop thtrough each table data section, adding all the data from the rows
-                if (lstTdElem.Count > 0)
-                {
-                    for (int i = 0; i < 9; i++)
-                    {
-                        strRowData = strRowData + lstTdElem[i].Text + ",";
-                    }
-                }
-                else
-                {
-                    // print the data into the console and add a comma between text
-                    Console.WriteLine(rows[0].Text.Replace(" ", ","));
-                }
+                // for each stock entry, a new stock is created
+                Stock newStock = new Stock();
+                newStock.Symbol = symbol;
+                newStock.Price = price;
+                newStock.Change = change;
+                newStock.PChange = pchange;
+                newStock.Volume = volume;
+                newStock.MarketCap = marketcap;
+
+                // that stock is then added to the list of stocks
+                stockList.Add(newStock);
             }
 
-            // Print the completed data to the console
-            System.Console.WriteLine(strRowData);
+            driver.Quit();
+
+            foreach (object stock in stockList)
+            {
+                Console.WriteLine(stock);
+            }
+
+            return stockList;
         }
     }
 }
-
-// these are XPaths
-
-// the * symbol is the wildcard or select all
-
-// table headers example: symbol, price, change, change %. currency, market time, volume
-//*[@id="pf-detail-table"]/div[1]/table/thead/tr/th[*]
-
-// all of column 1
-//*[@id="pf-detail-table"]/div[1]/table/tbody/tr[*]/td[*]/a
-
-// all of row 1
-//*[@id="pf-detail-table"]/div[1]/table/tbody/tr[1]/td[*]/span
-
 
 
 
