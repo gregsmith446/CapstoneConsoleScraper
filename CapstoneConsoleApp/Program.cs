@@ -78,14 +78,14 @@ namespace CapstoneConsoleApp
 
             //Loop iterate through portfolio of stocks, gathering data
             // current issue is the 
-            for (int i = 1; i <= count; i++)
+            for (int i = 1; i <= 12; i++)
             {
-                var symbol = driver.FindElement(By.XPath("//*[@id=\"pf - detail - table\"]/div[1]/table/tbody/tr[" + i + "]/td[1]/a")).GetAttribute("innerText");
-                var price = driver.FindElement(By.XPath("//*[@id=\"pf - detail - table\"]/div[1]/table/tbody/tr[" + i + "]/td[2]/a")).GetAttribute("innerText");
-                var change = driver.FindElement(By.XPath("//*[@id=\"pf - detail - table\"]/div[1]/table/tbody/tr[" + i + "]/td[3]/a")).GetAttribute("innerText");
-                var pchange = driver.FindElement(By.XPath("//*[@id=\"pf - detail - table\"]/div[1]/table/tbody/tr[" + i + "]/td[4]/a")).GetAttribute("innerText");
-                var volume = driver.FindElement(By.XPath("//*[@id=\"pf - detail - table\"]/div[1]/table/tbody/tr[" + i + "]/td[7]/a")).GetAttribute("innerText");
-                var marketcap = driver.FindElement(By.XPath("//*[@id=\"pf - detail - table\"]/div[1]/table/tbody/tr[" + i + "]/td[13]/a")).GetAttribute("innerText");
+                var symbol = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr["+ i +"]/td[1]/a")).GetAttribute("innerText");
+                var price = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr["+ i +"]/td[2]/span")).GetAttribute("innerText");
+                var change = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr[" + i + "]/td[3]/span")).GetAttribute("innerText");
+                var pchange = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr[" + i + "]/td[4]/span")).GetAttribute("innerText");
+                var volume = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr[" + i + "]/td[7]/span")).GetAttribute("innerText");
+                var marketcap = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr[" + i + "]/td[13]/span")).GetAttribute("innerText");
 
                 // for each stock entry, a new stock is created
                 Stock newStock = new Stock();
