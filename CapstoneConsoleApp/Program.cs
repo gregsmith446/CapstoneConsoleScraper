@@ -18,12 +18,10 @@ namespace CapstoneConsoleApp
 
             // using class, access the actual scraping code, which returns a list
             runScraper.Scrape();
-
-            // print the contents of that list to the console
-            Console.WriteLine("The Portfolio of stocks is as follows: ");
         }
     }
-        
+       
+    // create a stock object blueprint
     public class Stock
     {
         public string Symbol { get; set; }
@@ -35,8 +33,10 @@ namespace CapstoneConsoleApp
         public System.DateTime ScrapeTime { get; set; }
     }
 
+    // class to hold scraper code
     public class Scraper
     {
+        // function returns a list of stocks
         public List<Stock> Scrape()
         {
             ChromeOptions options = new ChromeOptions();
@@ -73,21 +73,31 @@ namespace CapstoneConsoleApp
 
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
 
-            var testpath = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr[1]/td[1]/a")).GetAttribute("innerText");
-            Console.WriteLine(testpath);
+            Console.WriteLine("Gathering Portfolio Data......................");
+
+            // print the contents of that list to the console
+            Console.WriteLine("The Portfolio of stocks is as follows: ");
 
             //Loop iterate through portfolio of stocks, gathering data
             // current issue is the 
-            for (int i = 1; i <= 12; i++)
+            for (int i = 1; i <= count; i++)
             {
-                var symbol = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr["+ i +"]/td[1]/a")).GetAttribute("innerText");
-                var price = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr["+ i +"]/td[2]/span")).GetAttribute("innerText");
-                var change = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr[" + i + "]/td[3]/span")).GetAttribute("innerText");
-                var pchange = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr[" + i + "]/td[4]/span")).GetAttribute("innerText");
-                var volume = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr[" + i + "]/td[7]/span")).GetAttribute("innerText");
-                var marketcap = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr[" + i + "]/td[13]/span")).GetAttribute("innerText");
+                string symbol = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr["+ i +"]/td[1]/a")).GetAttribute("innerText");
+                Console.WriteLine(symbol);
+                string price = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr["+ i +"]/td[2]/span")).GetAttribute("innerText");
+                Console.WriteLine(price);
+                string change = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr[" + i + "]/td[3]/span")).GetAttribute("innerText");
+                Console.WriteLine(change);
+                string pchange = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr[" + i + "]/td[4]/span")).GetAttribute("innerText");
+                Console.WriteLine(pchange);
+                string volume = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr[" + i + "]/td[7]/span")).GetAttribute("innerText");
+                Console.WriteLine(volume);
+                string marketcap = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr[" + i + "]/td[13]/span")).GetAttribute("innerText");
+                Console.WriteLine(marketcap);
 
-                // for each stock entry, a new stock is created
+
+                // for each stock entry, a new stock object is created
+                // the above data is set equal to the field within the object
                 Stock newStock = new Stock();
                 newStock.Symbol = symbol;
                 newStock.Price = price;
@@ -100,12 +110,18 @@ namespace CapstoneConsoleApp
                 stockList.Add(newStock);
             }
 
-            driver.Quit();
 
-            foreach (object stock in stockList)
-            {
-                Console.WriteLine(stock);
-            }
+            // a database table has been created
+
+            // connection string to SQL Server which contains database 'Scraper' and table 'dbo.Table'
+
+            // private static readonly string connectionString = @"Data Source = (localdb)\MSSQLLocalDB; Initial Catalog = master; Integrated Security = True; Connect Timeout = 30; Encrypt = False; TrustServerCertificate = False; ApplicationIntent = ReadWrite; MultiSubnetFailover = False";
+
+        // the table will have a schema which will match up the stock object's fields
+        // insert the stock objects into the database matching the schema
+        // test that insertion worked by viewing contents of database table
+
+        driver.Quit();
 
             return stockList;
         }
