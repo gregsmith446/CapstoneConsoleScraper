@@ -29,8 +29,8 @@ namespace CapstoneConsoleApp
         public string Change { get; set; }
         public string PChange { get; set; }
         public string Volume { get; set; }
+        public string ScrapeTime { get; set; }
         public string MarketCap { get; set; }
-        public System.DateTime ScrapeTime { get; set; }
     }
 
     // class to hold scraper code
@@ -40,18 +40,25 @@ namespace CapstoneConsoleApp
         public List<Stock> Scrape()
         {
             ChromeOptions options = new ChromeOptions();
-            options.AddArguments("test-Type", "--ignore-certificate-errors", "--disable-gpu", "window-size=1920,1080");
 
+            // Add capbilities to ChromeOptions
+            options.AddArguments("test -Type", "--ignore-certificate-errors", "--disable-gpu", "disable-popups");
+
+            // Launching browser with desired capabilities + proper binary file location
             IWebDriver driver = new ChromeDriver(@"\Users\gregs\Desktop\CD\CapstoneConsoleApp\CapstoneConsoleApp\bin", options);
+            driver.Manage().Window.Maximize();
+
+            // create default wait 100 seconds
+            var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(100000));
 
             driver.Navigate().GoToUrl("https://login.yahoo.com/config/login?.src=finance&amp;.intl=us&amp;.done=https%3A%2F%2Ffinance.yahoo.com%2Fportfolios");
-            driver.Manage().Window.Maximize();
 
             IWebElement username = driver.FindElement(By.Id("login-username"));
             username.SendKeys("gregsmith446@intracitygeeks.org");
             username.SendKeys(Keys.Return);
 
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+            // EXPLICIT WAIT
+            wait.Until(c => c.FindElement(By.Id("login-passwd")));
 
             IWebElement password = driver.FindElement(By.Id("login-passwd"));
             password.SendKeys("SILICONrhode1!");
@@ -60,7 +67,8 @@ namespace CapstoneConsoleApp
 
             driver.Navigate().GoToUrl("https://finance.yahoo.com/portfolio/p_0/view/v1");
 
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+            //EXPLICIT WAIT
+            wait.Until(c => c.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr[1]/td[13]/span")));
 
             IWebElement list = driver.FindElement(By.TagName("tbody"));
             ReadOnlyCollection<IWebElement> items = list.FindElements(By.TagName("tr"));
@@ -71,8 +79,6 @@ namespace CapstoneConsoleApp
             // create list to store stock data type
             List<Stock> stockList = new List<Stock>();
 
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
-
             Console.WriteLine("Gathering Portfolio Data......................");
 
             // print the contents of that list to the console
@@ -82,14 +88,16 @@ namespace CapstoneConsoleApp
             // current issue is the 
             for (int i = 1; i <= count; i++)
             {
-                string symbol = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr["+ i +"]/td[1]/a")).GetAttribute("innerText");
+                string symbol = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr[" + i + "]/td[1]/a")).GetAttribute("innerText");
                 Console.WriteLine(symbol);
-                string price = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr["+ i +"]/td[2]/span")).GetAttribute("innerText");
+                string price = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr[" + i + "]/td[2]/span")).GetAttribute("innerText");
                 Console.WriteLine(price);
                 string change = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr[" + i + "]/td[3]/span")).GetAttribute("innerText");
                 Console.WriteLine(change);
                 string pchange = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr[" + i + "]/td[4]/span")).GetAttribute("innerText");
                 Console.WriteLine(pchange);
+                string scrapeTime = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr[" + i + "]/td[6]/span")).GetAttribute("innerText");
+                Console.WriteLine(scrapeTime);
                 string volume = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr[" + i + "]/td[7]/span")).GetAttribute("innerText");
                 Console.WriteLine(volume);
                 string marketcap = driver.FindElement(By.XPath("//*[@id=\"pf-detail-table\"]/div[1]/table/tbody/tr[" + i + "]/td[13]/span")).GetAttribute("innerText");
@@ -103,14 +111,13 @@ namespace CapstoneConsoleApp
                 newStock.Price = price;
                 newStock.Change = change;
                 newStock.PChange = pchange;
+                newStock.ScrapeTime = scrapeTime;
                 newStock.Volume = volume;
                 newStock.MarketCap = marketcap;
 
                 // that stock is then added to the list of stocks
                 stockList.Add(newStock);
             }
-
-
             // a database table has been created
 
             // connection string to SQL Server which contains database 'Scraper' and table 'dbo.Table'
